@@ -1,145 +1,19 @@
 ---
+name: Incident.io Incidents
+description: Display real-time incident management data from Incident.io. Shows active incidents, critical counts, severity levels (P1-P5), duration, and impact information including affected teams, services, and users. Optimized for e-ink displays with high contrast black text.
+id: 175032
 strategy: polling
+markup_type: liquid
 no_screen_padding: 'no'
 dark_mode: 'no'
-static_data: |
-  {
-    "incidents": [
-      {
-        "id": "01HZXYZ123ABC",
-        "name": "Database performance degradation",
-        "reference": "INC-123",
-        "summary": "Queries taking 5x longer than normal on production DB",
-        "created_at": "2025-10-31T14:30:00Z",
-        "updated_at": "2025-10-31T15:45:00Z",
-        "incident_status": {
-          "category": "live",
-          "name": "Investigating"
-        },
-        "severity": {
-          "name": "P1",
-          "rank": 1
-        },
-        "incident_role_assignments": [
-          {
-            "role": {
-              "name": "Incident Lead"
-            },
-            "assignee": {
-              "name": "Sarah Chen"
-            }
-          }
-        ],
-        "incident_type": {
-          "name": "Service Degradation"
-        },
-        "has_debrief": true,
-        "custom_field_entries": []
-      },
-      {
-        "id": "01HZXYZ124DEF",
-        "name": "API rate limiting errors",
-        "reference": "INC-124",
-        "summary": "Users experiencing 429 errors on /api/v2/users endpoint",
-        "created_at": "2025-11-01T09:15:00Z",
-        "updated_at": "2025-11-01T09:20:00Z",
-        "incident_status": {
-          "category": "live",
-          "name": "Identified"
-        },
-        "severity": {
-          "name": "P2",
-          "rank": 2
-        },
-        "incident_role_assignments": [
-          {
-            "role": {
-              "name": "Incident Lead"
-            },
-            "assignee": {
-              "name": "Alex Martinez"
-            }
-          }
-        ],
-        "incident_type": {
-          "name": "Service Outage"
-        },
-        "custom_field_entries": []
-      },
-      {
-        "id": "01HZXYZ125GHI",
-        "name": "Monitoring alerts not delivering",
-        "reference": "INC-125",
-        "summary": "PagerDuty integration failing to send notifications",
-        "created_at": "2025-11-01T08:00:00Z",
-        "updated_at": "2025-11-01T10:30:00Z",
-        "incident_status": {
-          "category": "learning",
-          "name": "Monitoring"
-        },
-        "severity": {
-          "name": "P3",
-          "rank": 3
-        },
-        "incident_role_assignments": [
-          {
-            "role": {
-              "name": "Incident Lead"
-            },
-            "assignee": {
-              "name": "Jordan Lee"
-            }
-          }
-        ],
-        "incident_type": {
-          "name": "Infrastructure"
-        },
-        "custom_field_entries": []
-      },
-      {
-        "id": "01HZXYZ126JKL",
-        "name": "Login page slow loading",
-        "reference": "INC-126",
-        "summary": "Login page taking 10+ seconds to load for EMEA users",
-        "created_at": "2025-11-01T07:00:00Z",
-        "updated_at": "2025-11-01T11:00:00Z",
-        "incident_status": {
-          "category": "closed",
-          "name": "Resolved"
-        },
-        "severity": {
-          "name": "P5",
-          "rank": 4
-        },
-        "incident_role_assignments": [
-          {
-            "role": {
-              "name": "Incident Lead"
-            },
-            "assignee": {
-              "name": "Taylor Swift"
-            }
-          }
-        ],
-        "incident_type": {
-          "name": "Performance"
-        },
-        "custom_field_entries": []
-      }
-    ],
-    "pagination_meta": {
-      "after": null,
-      "page_size": 25
-    }
-  }
+refresh_interval: 15
 polling_verb: get
 polling_url: https://api.incident.io/v2/incidents?page_size={{ max_incidents }}
 polling_headers: Authorization=Bearer {{ api_key }}
 polling_body: ''
-id: 175032
 custom_fields:
 - keyname: api_key
-  field_type: string
+  field_type: password
   name: Incident.io API Key
   description: Your Incident.io API key. Get it from Settings > API Keys in your Incident.io dashboard.
   placeholder: inc_xxxxxxxxxxxxx
@@ -148,5 +22,10 @@ custom_fields:
   name: Max Incidents to Display
   description: Maximum number of incidents to show in the list (recommended 5-10)
   placeholder: 10
-name: Incident.io Incidents
-refresh_interval: 15
+- keyname: bio
+  name: Incident.io Incidents
+  field_type: author_bio
+  description: Display real-time incident management data from Incident.io. Shows active incidents, critical counts, severity levels (P1-P5), duration, and impact information including affected teams, services, and users. Optimized for e-ink displays with high contrast black text.
+  github_url: https://github.com/brittonjg/trmnl-incident-io
+  learn_more_url: https://jbritton.uk
+  email_address: me@jbritton.uk 
