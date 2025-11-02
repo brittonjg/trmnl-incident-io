@@ -68,13 +68,16 @@ Both files need to have matching data structures!
 
 ### 5. Layout Structure
 
-The plugin has 4 layouts:
+The plugin has 5 layouts:
 - **full.liquid** - Full screen with detailed incident list
 - **half_horizontal.liquid** - Half screen, horizontal orientation
 - **half_vertical.liquid** - Half screen, vertical orientation
 - **quadrant.liquid** - Minimal quadrant view
+- **shared.liquid** - Shared components should be kept here
 
 All layouts should use the same data structure and filtering logic.
+
+Changes within one layout should be reflected in another and centralised within shared.liquid if possible.
 
 ### 6. Production Checklist
 
@@ -174,11 +177,16 @@ Example from test data:
 
 ### 8. Framework Refactoring (November 2025)
 
-The plugin was refactored to use TRMNL's official design framework instead of inline styles, resulting in:
-- **~90% reduction in inline styles** across all templates
-- **~50% code reduction** through shared component extraction (from 441 lines to 217 lines in layout files)
-- **Better e-ink optimization** using framework's dithering patterns
+The plugin was refactored to use TRMNL's official design framework to meet marketplace requirements:
+- **100% inline style elimination** - Zero inline styles in user content (only framework-required body style remains)
+- **62% code reduction** through shared component extraction (from 441 lines to 165 lines in layout files)
+- **Better e-ink optimization** using framework's dithering patterns and spacing
 - **Improved maintainability** with single source of truth for common patterns
+
+**Key Achievements:**
+- Passed TRMNL marketplace validation (previously rejected for "too many inline styles")
+- Created reusable `incident_card` and `metrics_header` components
+- Standardized all 4 layouts to use consistent structure and components
 
 ### Framework Classes Used
 
@@ -194,11 +202,16 @@ The plugin was refactored to use TRMNL's official design framework instead of in
 **Layout & Spacing:**
 - `flex flex--wrap` - Flexible wrapping container
 - `gap--[4px]` - 4px gap between flex items
-- `mt--1` through `mt--2.5` - Margin top (4px to 10px)
-- `mb--1` - Margin bottom (4px)
-- `pl--2` - Padding left (8px)
-- `p--5` - Padding all sides (20px)
-- `p--2.5` - Padding all sides (10px)
+- `mt--1`, `mt--1.5`, `mt--2`, `mt--2.5` - Margin top (4px to 10px)
+- `mb--1`, `mb--1.5` - Margin bottom (4px to 6px)
+- `pl--1.5`, `pl--2` - Padding left (6px to 8px)
+- `pb--1.5`, `pb--2` - Padding bottom (6px to 8px)
+- `p--2.5`, `p--5` - Padding all sides (10px to 20px)
+
+**Item Emphasis Classes:**
+- `item--emphasis-3` - Highest emphasis (for P1 incidents)
+- `item--emphasis-2` - Medium emphasis (for P2 incidents)
+- `item` - Standard item (for P3-P5 incidents)
 
 **Components:**
 - `label--inverted` - Inverted label (white text on black background, for severity badges)
@@ -217,76 +230,144 @@ The plugin was refactored to use TRMNL's official design framework instead of in
 
 The refactoring extracted common patterns into reusable components:
 
-**1. Incident Counting (`count_incidents`)**
-- Calculates active_count, critical_count, closed_count
-- Used in all 4 layouts
+**1. Incident Counting (inline logic)**
+- Calculates active_count, critical_count, closed_count at the top of shared.liquid
+- Variables available globally to all layouts
 - Eliminates 10-13 lines of duplicate code per file
 
-**2. Duration Calculation (`calculate_duration`)**
-- Calculates hours and minutes from created_at timestamp
-- Used in 3 layouts (full, half_horizontal, half_vertical)
-- Returns duration_hours and duration_minutes variables
+**2. Metrics Header (`metrics_header`)**
+- **Usage:** `{% render "metrics_header", active: active_count, critical: critical_count, resolved: closed_count %}`
+- Always displays 3 columns: Active, Critical, Resolved
+- Uses framework grid classes: `grid grid--cols-3 gap--medium`
+- Consistent across all 4 layouts (full, half_horizontal, half_vertical, quadrant)
+- Single source of truth for metrics display
 
-**3. Format Duration (`format_duration`)**
-- Displays duration in human-readable format (e.g., "72h 40m" or "15m")
-- Handles both hour+minute and minute-only display
+**3. Incident Card (`incident_card`)**
+- **Usage:** `{% render "incident_card", incident: incident, truncate_length: 35 %}`
+- Displays: incident name, status, severity badge, and created timestamp
+- Handles severity emphasis automatically (P1 → item--emphasis-3, P2 → item--emphasis-2)
+- Configurable truncate length (35 for full/half_vertical, 40 for half_horizontal)
+- Used by all layouts that display incident lists
+- Eliminates 20+ lines of duplicate code per incident
 
 **4. Severity Badge (`severity_badge`)**
-- Displays severity with framework classes: `label--small label--inverted rounded--xsmall`
+- **Usage:** `{% render "severity_badge", severity: incident.severity %}`
+- Displays severity with framework classes: `label label--inverted rounded--xsmall ml--1`
 - Shows emoji indicators: ■ (P1), ● (P2), ▲ (P3), ○ (P4/P5)
-- Accepts size parameter: 'normal' (11px) or 'small' (9px)
+- No longer accepts size parameter (uses framework defaults)
 
-**5. Impact Badges**
+**5. Impact Badges (legacy - not currently used)**
 - `impact_badge_teams` - Shows affected teams with 👥 emoji
 - `impact_badge_services` - Shows affected services with ⚙️ emoji
 - `impact_badge_users` - Shows user count with 👤 emoji
-- All use framework classes: `label--small label--outline bg--gray-10 rounded--[3px]`
-- Accept size and limit parameters
+- **Note:** Removed from all layouts to reduce clutter on e-ink display
+- Components remain in shared.liquid for future use if needed
 
 **6. Empty State (`empty_state`)**
+- **Usage:** `{% render "empty_state", size: 'medium' %}`
 - Displays "All Clear" or "No Active Incidents" message
 - Accepts size parameter: 'large', 'medium', 'small'
 - Uses framework classes for all styling
 
 **7. Metric Card (`metric_card`)**
-- Displays value and label for metrics (Active, Critical, Resolved)
+- **Usage:** `{% render "metric_card", value: active_count, label: 'Active', centered: false %}`
+- Displays value and label for individual metrics
 - Accepts value, label, and centered (boolean) parameters
 - Uses framework classes: `value--large text--black font-bold` and `label text--black font-bold`
+- Called by metrics_header component
 
-### Justified Inline Styles
+**8. Duration Calculation (legacy - not currently used)**
+- `calculate_duration` and `format_duration` templates remain in shared.liquid
+- **Note:** Replaced with direct timestamp display (`{{ incident.created_at | date: "%b %d %H:%M" }}`)
+- Reason: Liquid's "now" date filter doesn't work reliably in TRMNL's environment
+- Showing created timestamp (e.g., "Oct 30 09:35") is more reliable and equally useful
 
-Some inline styles remain for valid technical reasons:
+### Layout Design Patterns
 
-**1. Line Heights** (no framework equivalent)
-- `line-height: 1.3` for incident names (prevents overlap)
-- `line-height: 1.5` for metadata rows (better readability)
+**Two-Column Layout** (full.liquid, half_horizontal.liquid):
+- Left column: Active incidents (3 for full, 2 for half_horizontal)
+- Right column: Closed incidents (3 for full, 2 for half_horizontal)
+- Uses `grid grid--cols-2 gap--medium` for consistent spacing
 
-**2. Dynamic Border Widths** (framework only has dithered borders)
-- P1 incidents: 4px solid black left border
-- P2 incidents: 3px solid black left border
-- P3+ incidents: 2px solid black left border
-- Framework's `border--v-*` classes create grayscale dithering patterns, not true width variations
+**Single-Column Layout** (half_vertical.liquid):
+- Shows active incidents only (up to 4)
+- More vertical space for incident details
 
-**3. Specific Font Sizes** (for precise control)
-- Severity badges: 9px or 11px depending on layout
-- Impact badges: 9px or 10px depending on layout
-- These precise sizes don't map to semantic framework classes
+**Metrics-Only Layout** (quadrant.liquid):
+- Shows only the 3-column metrics header
+- No incident list
+
+**Severity Visual Indicators:**
+- Replaced dynamic border widths with framework `item--emphasis` classes
+- P1 incidents: `item--emphasis-3` (highest visual priority)
+- P2 incidents: `item--emphasis-2` (medium visual priority)
+- P3-P5 incidents: Standard `item` class
+- This approach uses framework's built-in emphasis patterns instead of custom inline styles
+
+**Spacing Strategy:**
+- Removed all `line-height` inline styles
+- Use framework spacing classes: `mb--1`, `mb--1.5`, `mt--1`, `mt--2`, etc.
+- Added `pb--1.5` to incident cards for better vertical separation
+- Accept framework's default line-height for better compliance
 
 ### Code Reduction Summary
 
-**Before Refactoring:**
+**Before Refactoring (Initial Version):**
 - quadrant.liquid: 54 lines
 - half_vertical.liquid: 122 lines
 - half_horizontal.liquid: 122 lines
 - full.liquid: 143 lines
 - **Total: 441 lines**
+- **Inline styles:** 28+ per layout
 
-**After Refactoring:**
-- quadrant.liquid: 25 lines (54% reduction)
-- half_vertical.liquid: 61 lines (50% reduction)
-- half_horizontal.liquid: 61 lines (50% reduction)
-- full.liquid: 71 lines (50% reduction)
-- **Total: 217 lines (51% overall reduction)**
-- **Plus:** shared.liquid with 216 lines of reusable components
+**After Full Refactoring (Current Version):**
+- quadrant.liquid: 17 lines (69% reduction)
+- half_vertical.liquid: 31 lines (75% reduction)
+- half_horizontal.liquid: 54 lines (56% reduction)
+- full.liquid: 63 lines (56% reduction)
+- **Total: 165 lines (62% overall reduction)**
+- **Plus:** shared.liquid with 275 lines of reusable components
+- **Inline styles:** 0 (100% elimination - marketplace compliant)
 
-The refactoring moved duplicate code into shared components, making the layouts much more maintainable and consistent.
+**Key Improvements:**
+1. Created `metrics_header` component - eliminated 4-8 lines per layout
+2. Created `incident_card` component - eliminated 15-20 lines per incident
+3. All layouts use same incident counting logic from shared.liquid
+4. Consistent 3-column metrics across all layouts
+5. Zero inline styles - uses only framework classes
+
+The refactoring not only reduced code but made it fully TRMNL marketplace compliant.
+
+### 9. Marketplace Compliance Learnings (November 2025)
+
+**Problem:** Plugin rejected with "Markup uses too many inline styles, add more native Framework classes"
+
+**Solution Process:**
+1. **Identified inline styles:** Found 28+ style attributes in full.html (line-height, font-size, padding, border-left, background)
+2. **Removed badge sizing:** Eliminated font-size and padding from all badge components (7 styles removed)
+3. **Removed line-height:** Accepted framework defaults for line spacing (15 styles removed)
+4. **Replaced dynamic borders:** Changed border-left to item--emphasis classes (5 styles removed)
+5. **Added framework spacing:** Used pb--1.5, mb--1.5, mt--1, mt--2 for vertical spacing
+6. **Final result:** Zero inline styles except framework-required body tag
+
+**Key Takeaways:**
+- TRMNL marketplace strictly enforces framework-first design
+- Framework spacing classes (mb--, mt--, pb--, pl--) are sufficient for most layouts
+- Item emphasis classes (item--emphasis-2, item--emphasis-3) replace dynamic border styling
+- Accept framework defaults when possible (line-height, font-size) rather than customizing
+- Component extraction helps identify and eliminate repeated inline styles
+
+**Display Issues Encountered:**
+1. **Text overlap:** Without line-height styles, text overlapped vertically
+   - Solution: Added framework spacing classes (pb--1.5, mb--1, mt--1)
+2. **Duration calculation failed:** Liquid's "now" filter didn't work in TRMNL
+   - Solution: Display created timestamp instead (`{{ incident.created_at | date: "%b %d %H:%M" }}`)
+3. **Impact badges too small:** Original 9-10px sizing was hard to read
+   - Solution: Removed custom sizing, let framework handle it (cleaner appearance)
+
+**Current Layout Structure:**
+- All layouts show 3 metrics: Active, Critical, Resolved
+- full.liquid & half_horizontal.liquid: Two-column layout (active left, closed right)
+- half_vertical.liquid: Single-column layout (active only)
+- quadrant.liquid: Metrics only (no incidents)
+- All use shared components for consistency

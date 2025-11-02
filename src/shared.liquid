@@ -40,11 +40,16 @@
 {% endcomment %}
 
 {% template calculate_duration %}
-  {% assign created_time = created_at | date: "%s" %}
-  {% assign now_time = 'now' | date: "%s" %}
+  {% assign now_time = "now" | date: "%s" | times: 1 %}
+  {% assign created_time = created_at | date: "%s" | times: 1 %}
   {% assign duration_seconds = now_time | minus: created_time %}
-  {% assign duration_hours = duration_seconds | divided_by: 3600 %}
-  {% assign duration_minutes = duration_seconds | divided_by: 60 | modulo: 60 %}
+  {% if duration_seconds > 0 %}
+    {% assign duration_hours = duration_seconds | divided_by: 3600 %}
+    {% assign duration_minutes = duration_seconds | divided_by: 60 | modulo: 60 %}
+  {% else %}
+    {% assign duration_hours = 0 %}
+    {% assign duration_minutes = 0 %}
+  {% endif %}
 {% endtemplate %}
 
 
@@ -58,10 +63,14 @@
 {% endcomment %}
 
 {% template format_duration %}
-  {% if hours > 0 %}
-    {{ hours }}h {{ minutes }}m
+  {% assign h = hours | default: 0 %}
+  {% assign m = minutes | default: 0 %}
+  {% if h > 0 %}
+    {{ h }}h {{ m }}m
+  {% elsif m > 0 %}
+    {{ m }}m
   {% else %}
-    {{ minutes }}m
+    0m
   {% endif %}
 {% endtemplate %}
 
@@ -73,16 +82,11 @@
   Display severity badge with framework classes
   Uses: label label--inverted rounded--xsmall ml--1
 
-  Usage: {% render "severity_badge", severity: incident.severity, size: 'normal' %}
-         size options: 'normal' (14px), 'small' (12px)
+  Usage: {% render "severity_badge", severity: incident.severity %}
 {% endcomment %}
 
 {% template severity_badge %}
-  {% if size == 'small' %}
-    <span class="label label--inverted rounded--xsmall ml--1 font-bold" style="font-size: 12px; padding: 4px 8px;">
-  {% else %}
-    <span class="label label--inverted rounded--xsmall ml--1 font-bold" style="font-size: 14px; padding: 4px 8px;">
-  {% endif %}
+  <span class="label label--inverted rounded--xsmall ml--1">
     {% if severity.name == 'P1' %}■{% elsif severity.name == 'P2' %}●{% elsif severity.name == 'P3' %}▲{% else %}○{% endif %} {{ severity.name }}
   </span>
 {% endtemplate %}
@@ -94,19 +98,14 @@
   ============================================
   Display affected teams badge
 
-  Usage: {% render "impact_badge_teams", field: field, limit: 3, size: 'normal' %}
-         size options: 'normal' (14px), 'small' (12px)
+  Usage: {% render "impact_badge_teams", field: field, limit: 3 %}
 {% endcomment %}
 
 {% template impact_badge_teams %}
   {% if field.custom_field.name == "Affected teams" and field.values.size > 0 %}
-    {% if size == 'small' %}
-      <span class="label label--outline text--black font-bold rounded--[3px]" style="font-size: 12px; padding: 4px 8px;">
-    {% else %}
-      <span class="label label--outline text--black font-bold rounded--[3px]" style="font-size: 14px; padding: 4px 8px;">
-    {% endif %}
-        👥 {% for value in field.values limit: limit %}{{ value.value_catalog_entry.name }}{% unless forloop.last %}, {% endunless %}{% endfor %}
-      </span>
+    <span class="label label--outline text--black rounded--[3px]">
+      👥 {% for value in field.values limit: limit %}{{ value.value_catalog_entry.name }}{% unless forloop.last %}, {% endunless %}{% endfor %}
+    </span>
   {% endif %}
 {% endtemplate %}
 
@@ -117,19 +116,14 @@
   ============================================
   Display affected services badge
 
-  Usage: {% render "impact_badge_services", field: field, limit: 3, size: 'normal' %}
-         size options: 'normal' (14px), 'small' (12px)
+  Usage: {% render "impact_badge_services", field: field, limit: 3 %}
 {% endcomment %}
 
 {% template impact_badge_services %}
   {% if field.custom_field.name == "Affected services" and field.values.size > 0 %}
-    {% if size == 'small' %}
-      <span class="label label--outline text--black font-bold rounded--[3px]" style="font-size: 12px; padding: 4px 8px;">
-    {% else %}
-      <span class="label label--outline text--black font-bold rounded--[3px]" style="font-size: 14px; padding: 4px 8px;">
-    {% endif %}
-        ⚙️ {% for value in field.values limit: limit %}{{ value.value_catalog_entry.name }}{% unless forloop.last %}, {% endunless %}{% endfor %}
-      </span>
+    <span class="label label--outline text--black rounded--[3px]">
+      ⚙️ {% for value in field.values limit: limit %}{{ value.value_catalog_entry.name }}{% unless forloop.last %}, {% endunless %}{% endfor %}
+    </span>
   {% endif %}
 {% endtemplate %}
 
@@ -140,19 +134,14 @@
   ============================================
   Display affected users count badge
 
-  Usage: {% render "impact_badge_users", field: field, size: 'normal' %}
-         size options: 'normal' (14px), 'small' (12px)
+  Usage: {% render "impact_badge_users", field: field %}
 {% endcomment %}
 
 {% template impact_badge_users %}
   {% if field.custom_field.name == "Number of Affected Users" and field.values.size > 0 %}
-    {% if size == 'small' %}
-      <span class="label label--outline text--black font-bold rounded--[3px]" style="font-size: 12px; padding: 4px 8px;">
-    {% else %}
-      <span class="label label--outline text--black font-bold rounded--[3px]" style="font-size: 14px; padding: 4px 8px;">
-    {% endif %}
-        👤 {{ field.values[0].value_numeric }} users
-      </span>
+    <span class="label label--outline text--black rounded--[3px]">
+      👤 {{ field.values[0].value_numeric }} users
+    </span>
   {% endif %}
 {% endtemplate %}
 
@@ -211,5 +200,94 @@
         <div class="label text--black font-bold">{{ label }}</div>
       </div>
     {% endif %}
+  </div>
+{% endtemplate %}
+
+
+{% comment %}
+  ============================================
+  METRICS HEADER
+  ============================================
+  Display incident count metrics (always 3 columns)
+
+  Usage: {% render "metrics_header", active: active_count, critical: critical_count, resolved: closed_count %}
+{% endcomment %}
+
+{% template metrics_header %}
+  <div class="grid grid--cols-3 gap--medium">
+    {% render "metric_card", value: active, label: 'Active', centered: false %}
+    {% render "metric_card", value: critical, label: 'Critical', centered: false %}
+    {% render "metric_card", value: resolved, label: 'Resolved', centered: false %}
+  </div>
+{% endtemplate %}
+
+
+{% comment %}
+  ============================================
+  INCIDENT CARD
+  ============================================
+  Display a single incident with all details
+
+  Usage: {% render "incident_card", incident: incident, truncate_length: 35, show_impact: true %}
+         truncate_length: chars to truncate incident name (default: 35)
+         show_impact: whether to show impact badges (default: false)
+{% endcomment %}
+
+{% template incident_card %}
+  {% assign trunc = truncate_length | default: 35 %}
+  {% assign show = show_impact | default: false %}
+
+  {% if incident.severity.name == 'P1' %}
+    <div class="item item--emphasis-3 pl--1.5 pb--1.5">
+  {% elsif incident.severity.name == 'P2' %}
+    <div class="item item--emphasis-2 pl--1.5 pb--1.5">
+  {% else %}
+    <div class="item pl--1.5 pb--1.5">
+  {% endif %}
+    <div class="content">
+      <div class="label text--black font-bold mb--1">
+        {{ incident.name | truncate: trunc }}
+      </div>
+      <div class="label--small text--black">
+        {{ incident.incident_status.name }} •
+        {% render "severity_badge", severity: incident.severity %} •
+        {{ incident.created_at | date: "%b %d %H:%M" }}
+      </div>
+    </div>
+    {% if show %}
+      <div class="flex flex--wrap gap--[4px] mt--1.5 text--black">
+        {% for field in incident.custom_field_entries %}
+          {% render "impact_badge_teams", field: field, limit: 2 %}
+          {% render "impact_badge_services", field: field, limit: 2 %}
+          {% render "impact_badge_users", field: field %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+{% endtemplate %}
+
+
+{% comment %}
+  ============================================
+  TITLE BAR
+  ============================================
+  Display title bar with logo and status (always shows status)
+
+  Usage: {% render "title_bar" %}
+{% endcomment %}
+
+{% template title_bar %}
+  <div class="title_bar">
+    <img class="image" src="assets/incident-io.png">
+    <span class="title">Incident.io</span>
+    <span class="instance">
+      {% if active_count == 1 %}
+        1 Active Incident
+      {% elsif active_count > 1 %}
+        {{ active_count }} Active Incidents
+      {% else %}
+        All Clear
+      {% endif %}
+    </span>
   </div>
 {% endtemplate %}

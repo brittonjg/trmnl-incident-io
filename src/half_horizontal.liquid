@@ -1,53 +1,51 @@
 {% comment %}
   Incident.io Active Incidents - Half Horizontal Layout
-  Compact view showing active count and top incidents
+  Compact two-column view showing active and closed incidents
 {% endcomment %}
 
 <div class="layout layout--col gap--space-between">
 
-  <!-- Active Incident Count -->
-  <div class="grid grid--cols-2 gap--medium">
-    {% render "metric_card", value: active_count, label: 'Active', centered: false %}
-    {% render "metric_card", value: critical_count, label: 'Critical', centered: false %}
-  </div>
+  <!-- Metrics -->
+  {% render "metrics_header", active: active_count, critical: critical_count, resolved: closed_count %}
 
-  <!-- Incidents List -->
-  <div class="grid grid--cols-1 gap--small mt--2.5">
-    {% assign incident_count = 0 %}
-    {% for incident in all_incidents %}
-      {% if incident.incident_status.category != "closed" and incident_count < 3 %}
-        {% assign incident_count = incident_count | plus: 1 %}
+  <!-- Two Column Layout: Active Left, Closed Right -->
+  <div class="grid grid--cols-2 gap--medium mt--2.5">
 
-        <div class="item pl--2" style="border-left: {% if incident.severity.name == 'P1' %}4px solid #000000{% elsif incident.severity.name == 'P2' %}3px solid #000000{% elsif incident.severity.name contains 'P' %}2px solid #000000{% else %}1px solid #000000{% endif %};">
-          <div class="content">
-            <div class="label text--black font-bold mb--1" style="line-height: 1.3;">
-              {{ incident.name | truncate: 40 }}
-            </div>
-            <div class="label--small text--black font-bold" style="line-height: 1.5;">
-              {{ incident.incident_type.name }} • {{ incident.incident_status.name }} •
-              {% render "severity_badge", severity: incident.severity, size: 'small' %}
-            </div>
-          </div>
-          {% comment %} Show impact information {% endcomment %}
-          <div class="flex flex--wrap gap--[4px] mt--1.5 text--black" style="line-height: 1.5;">
-            {% for field in incident.custom_field_entries %}
-              {% render "impact_badge_teams", field: field, limit: 2, size: 'small' %}
-              {% render "impact_badge_services", field: field, limit: 2, size: 'small' %}
-              {% render "impact_badge_users", field: field, size: 'small' %}
-            {% endfor %}
+    <!-- Left Column: Active Incidents -->
+    <div class="grid grid--cols-1 gap--small">
+      {% assign active_shown = 0 %}
+      {% for incident in all_incidents %}
+        {% if incident.incident_status.category != "closed" and active_shown < 2 %}
+          {% assign active_shown = active_shown | plus: 1 %}
+          {% render "incident_card", incident: incident, truncate_length: 35 %}
+        {% endif %}
+      {% endfor %}
+      {% if active_count == 0 %}
+        {% render "empty_state", size: 'small' %}
+      {% endif %}
+    </div>
+
+    <!-- Right Column: Closed Incidents -->
+    <div class="grid grid--cols-1 gap--small">
+      {% assign closed_shown = 0 %}
+      {% for incident in all_incidents %}
+        {% if incident.incident_status.category == "closed" and closed_shown < 2 %}
+          {% assign closed_shown = closed_shown | plus: 1 %}
+          {% render "incident_card", incident: incident, truncate_length: 35 %}
+        {% endif %}
+      {% endfor %}
+      {% if closed_count == 0 %}
+        <div class="item">
+          <div class="content text--center p--2.5">
+            <div class="label--small text--black">No closed incidents</div>
           </div>
         </div>
       {% endif %}
-    {% endfor %}
-    {% if active_count == 0 %}
-      {% render "empty_state", size: 'medium' %}
-    {% endif %}
+    </div>
+
   </div>
 
 </div>
 
 <!-- Title Bar -->
-<div class="title_bar">
-  <img class="image" src="https://cdn.brandfetch.io/idBR-MZuZU/w/400/h/400/theme/dark/icon.jpeg">
-  <span class="title">Incident.io</span>
-</div>
+{% render "title_bar" %}

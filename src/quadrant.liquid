@@ -6,15 +6,9 @@
 <div class="layout layout--col gap--space-between">
 
   <!-- Metrics Display -->
-  <div class="grid grid--cols-2 gap--medium">
-    {% render "metric_card", value: active_count, label: 'Active', centered: true %}
-    {% render "metric_card", value: critical_count, label: 'Critical', centered: true %}
-  </div>
+  {% render "metrics_header", active: active_count, critical: critical_count, resolved: closed_count %}
 
 </div>
 
 <!-- Title Bar -->
-<div class="title_bar">
-  <img class="image" src="https://cdn.brandfetch.io/idBR-MZuZU/w/400/h/400/theme/dark/icon.jpeg">
-  <span class="title">Incident.io</span>
-</div>
+{% render "title_bar" %}
