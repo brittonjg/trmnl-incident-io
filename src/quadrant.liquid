@@ -1,47 +1,14 @@
 {% comment %}
   Incident.io Active Incidents - Quadrant Layout
-  Minimal view showing active incident count with color indicator
+  Minimal view showing active and critical incident counts
 {% endcomment %}
-
-{% comment %} Filter for active incidents (live + learning/documenting) {% endcomment %}
-{% assign all_incidents = incidents %}
-{% comment %} Count incidents manually since Liquid where doesn't work with nested properties {% endcomment %}
-{% assign active_count = 0 %}
-{% assign critical_count = 0 %}
-{% for incident in all_incidents %}
-  {% if incident.incident_status.category != "closed" %}
-    {% assign active_count = active_count | plus: 1 %}
-    {% if incident.severity.name == "P1" %}
-      {% assign critical_count = critical_count | plus: 1 %}
-    {% endif %}
-  {% endif %}
-{% endfor %}
 
 <div class="layout layout--col gap--space-between">
 
   <!-- Metrics Display -->
   <div class="grid grid--cols-2 gap--medium">
-    <div class="item">
-      <div class="content" style="text-align: center;">
-        <div class="value--large" style="color: #000000; font-weight: bold;">
-          {{ active_count }}
-        </div>
-        <div class="label--small" style="margin-top: 4px; color: #000000; font-size: 14px; font-weight: bold;">
-          Active
-        </div>
-      </div>
-    </div>
-
-    <div class="item">
-      <div class="content" style="text-align: center;">
-        <div class="value--large" style="color: #000000; font-weight: bold;">
-          {{ critical_count }}
-        </div>
-        <div class="label--small" style="margin-top: 4px; color: #000000; font-size: 14px; font-weight: bold;">
-          Critical
-        </div>
-      </div>
-    </div>
+    {% render "metric_card", value: active_count, label: 'Active', centered: true %}
+    {% render "metric_card", value: critical_count, label: 'Critical', centered: true %}
   </div>
 
 </div>

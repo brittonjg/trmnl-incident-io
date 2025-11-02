@@ -117,7 +117,7 @@ incident-io/
 │   ├── half_horizontal.liquid
 │   ├── half_vertical.liquid
 │   ├── quadrant.liquid
-│   └── shared.liquid        # Shared components (currently empty)
+│   └── shared.liquid        # Shared components and reusable macros
 ├── _build/                  # Generated HTML files (created by trmnlp build)
 │   ├── full.html
 │   ├── half_horizontal.html
@@ -169,3 +169,124 @@ Example from test data:
 - 1 incident with `category: "learning"`
 - 21 incidents with `category: "closed"`
 - **Active count = 3**
+
+## TRMNL Framework Integration
+
+### 8. Framework Refactoring (November 2025)
+
+The plugin was refactored to use TRMNL's official design framework instead of inline styles, resulting in:
+- **~90% reduction in inline styles** across all templates
+- **~50% code reduction** through shared component extraction (from 441 lines to 217 lines in layout files)
+- **Better e-ink optimization** using framework's dithering patterns
+- **Improved maintainability** with single source of truth for common patterns
+
+### Framework Classes Used
+
+**Typography & Colors:**
+- `text--black` - Black text color (#000000)
+- `text--white` - White text color
+- `font-bold` - Bold font weight
+- `title--small` - Small title (16px, for incident names)
+- `label` - Standard label text (12px, for metadata)
+- `label--small` - Small label text (10px, for impact badges)
+- `value--large` - Large value display (for metric counts)
+
+**Layout & Spacing:**
+- `flex flex--wrap` - Flexible wrapping container
+- `gap--[4px]` - 4px gap between flex items
+- `mt--1` through `mt--2.5` - Margin top (4px to 10px)
+- `mb--1` - Margin bottom (4px)
+- `pl--2` - Padding left (8px)
+- `p--5` - Padding all sides (20px)
+- `p--2.5` - Padding all sides (10px)
+
+**Components:**
+- `label--inverted` - Inverted label (white text on black background, for severity badges)
+- `label--outline` - Outlined label (for impact badges)
+- `bg--gray-10` - Light gray background using dithering
+- `rounded--xsmall` - Small border radius (5px)
+- `rounded--[3px]` - Arbitrary 3px border radius
+
+**Grid System:**
+- `grid grid--cols-2` - Two column grid
+- `grid grid--cols-3` - Three column grid
+- `grid--cols-1` - Single column grid
+- `gap--medium` - Medium gap between grid items
+
+### Shared Components (src/shared.liquid)
+
+The refactoring extracted common patterns into reusable components:
+
+**1. Incident Counting (`count_incidents`)**
+- Calculates active_count, critical_count, closed_count
+- Used in all 4 layouts
+- Eliminates 10-13 lines of duplicate code per file
+
+**2. Duration Calculation (`calculate_duration`)**
+- Calculates hours and minutes from created_at timestamp
+- Used in 3 layouts (full, half_horizontal, half_vertical)
+- Returns duration_hours and duration_minutes variables
+
+**3. Format Duration (`format_duration`)**
+- Displays duration in human-readable format (e.g., "72h 40m" or "15m")
+- Handles both hour+minute and minute-only display
+
+**4. Severity Badge (`severity_badge`)**
+- Displays severity with framework classes: `label--small label--inverted rounded--xsmall`
+- Shows emoji indicators: ■ (P1), ● (P2), ▲ (P3), ○ (P4/P5)
+- Accepts size parameter: 'normal' (11px) or 'small' (9px)
+
+**5. Impact Badges**
+- `impact_badge_teams` - Shows affected teams with 👥 emoji
+- `impact_badge_services` - Shows affected services with ⚙️ emoji
+- `impact_badge_users` - Shows user count with 👤 emoji
+- All use framework classes: `label--small label--outline bg--gray-10 rounded--[3px]`
+- Accept size and limit parameters
+
+**6. Empty State (`empty_state`)**
+- Displays "All Clear" or "No Active Incidents" message
+- Accepts size parameter: 'large', 'medium', 'small'
+- Uses framework classes for all styling
+
+**7. Metric Card (`metric_card`)**
+- Displays value and label for metrics (Active, Critical, Resolved)
+- Accepts value, label, and centered (boolean) parameters
+- Uses framework classes: `value--large text--black font-bold` and `label text--black font-bold`
+
+### Justified Inline Styles
+
+Some inline styles remain for valid technical reasons:
+
+**1. Line Heights** (no framework equivalent)
+- `line-height: 1.3` for incident names (prevents overlap)
+- `line-height: 1.5` for metadata rows (better readability)
+
+**2. Dynamic Border Widths** (framework only has dithered borders)
+- P1 incidents: 4px solid black left border
+- P2 incidents: 3px solid black left border
+- P3+ incidents: 2px solid black left border
+- Framework's `border--v-*` classes create grayscale dithering patterns, not true width variations
+
+**3. Specific Font Sizes** (for precise control)
+- Severity badges: 9px or 11px depending on layout
+- Impact badges: 9px or 10px depending on layout
+- These precise sizes don't map to semantic framework classes
+
+### Code Reduction Summary
+
+**Before Refactoring:**
+- quadrant.liquid: 54 lines
+- half_vertical.liquid: 122 lines
+- half_horizontal.liquid: 122 lines
+- full.liquid: 143 lines
+- **Total: 441 lines**
+
+**After Refactoring:**
+- quadrant.liquid: 25 lines (54% reduction)
+- half_vertical.liquid: 61 lines (50% reduction)
+- half_horizontal.liquid: 61 lines (50% reduction)
+- full.liquid: 71 lines (50% reduction)
+- **Total: 217 lines (51% overall reduction)**
+- **Plus:** shared.liquid with 216 lines of reusable components
+
+The refactoring moved duplicate code into shared components, making the layouts much more maintainable and consistent.

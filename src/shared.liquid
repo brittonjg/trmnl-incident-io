@@ -1,1 +1,215 @@
+{% comment %}
+  Shared Components for Incident.io TRMNL Plugin
+  These components use TRMNL framework classes instead of inline styles
 
+  TRMNL uses {% template %} to define and {% render %} to use templates
+{% endcomment %}
+
+{% comment %}
+  ============================================
+  INCIDENT COUNTING
+  ============================================
+  Calculate active, closed, and critical incident counts
+  This is prepended to all layouts, so variables are available globally
+{% endcomment %}
+
+{% assign all_incidents = incidents %}
+{% assign active_count = 0 %}
+{% assign closed_count = 0 %}
+{% assign critical_count = 0 %}
+{% for incident in all_incidents %}
+  {% if incident.incident_status.category == "closed" %}
+    {% assign closed_count = closed_count | plus: 1 %}
+  {% else %}
+    {% assign active_count = active_count | plus: 1 %}
+    {% if incident.severity.name == "P1" %}
+      {% assign critical_count = critical_count | plus: 1 %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+
+
+{% comment %}
+  ============================================
+  DURATION CALCULATION
+  ============================================
+  Calculate hours and minutes from incident created_at
+
+  Usage: {% render "calculate_duration", created_at: incident.created_at %}
+         Then use: {{ duration_hours }}, {{ duration_minutes }}
+{% endcomment %}
+
+{% template calculate_duration %}
+  {% assign created_time = created_at | date: "%s" %}
+  {% assign now_time = 'now' | date: "%s" %}
+  {% assign duration_seconds = now_time | minus: created_time %}
+  {% assign duration_hours = duration_seconds | divided_by: 3600 %}
+  {% assign duration_minutes = duration_seconds | divided_by: 60 | modulo: 60 %}
+{% endtemplate %}
+
+
+{% comment %}
+  ============================================
+  FORMAT DURATION
+  ============================================
+  Display duration in human-readable format
+
+  Usage: {% render "format_duration", hours: duration_hours, minutes: duration_minutes %}
+{% endcomment %}
+
+{% template format_duration %}
+  {% if hours > 0 %}
+    {{ hours }}h {{ minutes }}m
+  {% else %}
+    {{ minutes }}m
+  {% endif %}
+{% endtemplate %}
+
+
+{% comment %}
+  ============================================
+  SEVERITY BADGE
+  ============================================
+  Display severity badge with framework classes
+  Uses: label label--inverted rounded--xsmall ml--1
+
+  Usage: {% render "severity_badge", severity: incident.severity, size: 'normal' %}
+         size options: 'normal' (14px), 'small' (12px)
+{% endcomment %}
+
+{% template severity_badge %}
+  {% if size == 'small' %}
+    <span class="label label--inverted rounded--xsmall ml--1 font-bold" style="font-size: 12px; padding: 4px 8px;">
+  {% else %}
+    <span class="label label--inverted rounded--xsmall ml--1 font-bold" style="font-size: 14px; padding: 4px 8px;">
+  {% endif %}
+    {% if severity.name == 'P1' %}■{% elsif severity.name == 'P2' %}●{% elsif severity.name == 'P3' %}▲{% else %}○{% endif %} {{ severity.name }}
+  </span>
+{% endtemplate %}
+
+
+{% comment %}
+  ============================================
+  IMPACT BADGE - TEAMS
+  ============================================
+  Display affected teams badge
+
+  Usage: {% render "impact_badge_teams", field: field, limit: 3, size: 'normal' %}
+         size options: 'normal' (14px), 'small' (12px)
+{% endcomment %}
+
+{% template impact_badge_teams %}
+  {% if field.custom_field.name == "Affected teams" and field.values.size > 0 %}
+    {% if size == 'small' %}
+      <span class="label label--outline text--black font-bold rounded--[3px]" style="font-size: 12px; padding: 4px 8px;">
+    {% else %}
+      <span class="label label--outline text--black font-bold rounded--[3px]" style="font-size: 14px; padding: 4px 8px;">
+    {% endif %}
+        👥 {% for value in field.values limit: limit %}{{ value.value_catalog_entry.name }}{% unless forloop.last %}, {% endunless %}{% endfor %}
+      </span>
+  {% endif %}
+{% endtemplate %}
+
+
+{% comment %}
+  ============================================
+  IMPACT BADGE - SERVICES
+  ============================================
+  Display affected services badge
+
+  Usage: {% render "impact_badge_services", field: field, limit: 3, size: 'normal' %}
+         size options: 'normal' (14px), 'small' (12px)
+{% endcomment %}
+
+{% template impact_badge_services %}
+  {% if field.custom_field.name == "Affected services" and field.values.size > 0 %}
+    {% if size == 'small' %}
+      <span class="label label--outline text--black font-bold rounded--[3px]" style="font-size: 12px; padding: 4px 8px;">
+    {% else %}
+      <span class="label label--outline text--black font-bold rounded--[3px]" style="font-size: 14px; padding: 4px 8px;">
+    {% endif %}
+        ⚙️ {% for value in field.values limit: limit %}{{ value.value_catalog_entry.name }}{% unless forloop.last %}, {% endunless %}{% endfor %}
+      </span>
+  {% endif %}
+{% endtemplate %}
+
+
+{% comment %}
+  ============================================
+  IMPACT BADGE - USERS
+  ============================================
+  Display affected users count badge
+
+  Usage: {% render "impact_badge_users", field: field, size: 'normal' %}
+         size options: 'normal' (14px), 'small' (12px)
+{% endcomment %}
+
+{% template impact_badge_users %}
+  {% if field.custom_field.name == "Number of Affected Users" and field.values.size > 0 %}
+    {% if size == 'small' %}
+      <span class="label label--outline text--black font-bold rounded--[3px]" style="font-size: 12px; padding: 4px 8px;">
+    {% else %}
+      <span class="label label--outline text--black font-bold rounded--[3px]" style="font-size: 14px; padding: 4px 8px;">
+    {% endif %}
+        👤 {{ field.values[0].value_numeric }} users
+      </span>
+  {% endif %}
+{% endtemplate %}
+
+
+{% comment %}
+  ============================================
+  EMPTY STATE
+  ============================================
+  Display "No Active Incidents" message
+
+  Usage: {% render "empty_state", size: 'large' %}
+         size options: 'large', 'medium', 'small'
+{% endcomment %}
+
+{% template empty_state %}
+  <div class="item">
+    {% if size == 'large' %}
+      <div class="content text--center p--5">
+        <div class="value--large text--black font-bold">✓</div>
+        <div class="label mt--2 text--black font-bold">All Clear</div>
+      </div>
+    {% elsif size == 'medium' %}
+      <div class="content text--center p--5">
+        <div class="value--large text--black font-bold">✓</div>
+        <div class="label mt--2 text--black font-bold">No Active Incidents</div>
+      </div>
+    {% else %}
+      <div class="content text--center p--2.5">
+        <div class="value text--black font-bold">✓</div>
+        <div class="label--small mt--1 text--black font-bold">All Clear</div>
+      </div>
+    {% endif %}
+  </div>
+{% endtemplate %}
+
+
+{% comment %}
+  ============================================
+  METRIC CARD
+  ============================================
+  Display metric value and label
+
+  Usage: {% render "metric_card", value: active_count, label: 'Active', centered: true %}
+{% endcomment %}
+
+{% template metric_card %}
+  <div class="item">
+    {% if centered %}
+      <div class="content text--center">
+        <div class="value--large text--black font-bold">{{ value }}</div>
+        <div class="label text--black font-bold mt--1">{{ label }}</div>
+      </div>
+    {% else %}
+      <div class="content">
+        <div class="value--large text--black font-bold">{{ value }}</div>
+        <div class="label text--black font-bold">{{ label }}</div>
+      </div>
+    {% endif %}
+  </div>
+{% endtemplate %}
