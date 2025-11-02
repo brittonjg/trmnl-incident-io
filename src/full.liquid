@@ -1,0 +1,142 @@
+{% comment %}
+  Incident.io Active Incidents - Full Screen Layout
+  Displays incident statistics and detailed incident list
+{% endcomment %}
+
+{% comment %} Filter incidents - show all non-closed as "active" {% endcomment %}
+{% assign all_incidents = incidents %}
+{% comment %} Count incidents manually since Liquid where doesn't work with nested properties {% endcomment %}
+{% assign active_count = 0 %}
+{% assign closed_count = 0 %}
+{% assign critical_count = 0 %}
+{% for incident in all_incidents %}
+  {% if incident.incident_status.category == "closed" %}
+    {% assign closed_count = closed_count | plus: 1 %}
+  {% else %}
+    {% assign active_count = active_count | plus: 1 %}
+    {% if incident.severity.name == "P1" %}
+      {% assign critical_count = critical_count | plus: 1 %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+
+{% assign max_display = max_incidents | default: 5 %}
+{% assign incidents_to_show = incidents | slice: 0, max_display %}
+
+<div class="layout layout--col gap--space-between">
+
+  <!-- Status Summary Cards -->
+  <div class="grid grid--cols-3 gap--medium">
+    <div class="item">
+      <div class="content">
+        <div class="value--large" style="color: #000000; font-weight: bold;">
+          {{ active_count }}
+        </div>
+        <div class="label--small" style="font-weight: bold; color: #000000; font-size: 16px;">Active</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="content">
+        <div class="value--large" style="color: #000000; font-weight: bold;">
+          {{ critical_count }}
+        </div>
+        <div class="label--small" style="color: #000000; font-size: 16px; font-weight: bold;">Critical</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="content">
+        <div class="value--large" style="color: #000000; font-weight: bold;">
+          {{ closed_count }}
+        </div>
+        <div class="label--small" style="color: #000000; font-size: 16px; font-weight: bold;">Resolved</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Incidents List -->
+  <div class="grid grid--cols-1 gap--small" style="margin-top: 10px;">
+    {% if incidents_to_show.size > 0 %}
+      {% for incident in incidents_to_show %}
+        {% assign created_time = incident.created_at | date: "%s" %}
+        {% assign now_time = 'now' | date: "%s" %}
+        {% assign duration_seconds = now_time | minus: created_time %}
+        {% assign duration_hours = duration_seconds | divided_by: 3600 %}
+        {% assign duration_minutes = duration_seconds | divided_by: 60 | modulo: 60 %}
+
+        <div class="item" style="border-left: {% if incident.severity.name == 'P1' %}4px solid #000000{% elsif incident.severity.name == 'P2' %}3px solid #000000{% elsif incident.severity.name contains 'P' %}2px solid #000000{% else %}1px solid #000000{% endif %}; padding-left: 8px;">
+          <div class="content">
+            <div style="margin-bottom: 4px; font-size: 16px; font-weight: bold; color: #000000; line-height: 1.3;">
+              {{ incident.name | truncate: 50 }}
+            </div>
+            <div style="font-size: 12px; color: #000000; font-weight: bold; line-height: 1.5;">
+              {{ incident.incident_type.name }} • {{ incident.incident_status.name }} •
+              <span style="background: #000000; color: white; padding: 2px 6px; border-radius: 2px; font-size: 11px; margin-left: 4px;">
+                {% if incident.severity.name == 'P1' %}■{% elsif incident.severity.name == 'P2' %}●{% elsif incident.severity.name == 'P3' %}▲{% else %}○{% endif %} {{ incident.severity.name }}
+              </span>
+              •
+              {% if duration_hours > 0 %}
+                {{ duration_hours }}h {{ duration_minutes }}m
+              {% else %}
+                {{ duration_minutes }}m
+              {% endif %}
+            </div>
+          </div>
+          {% comment %} Show impact information {% endcomment %}
+          <div style="margin-top: 6px; font-size: 10px; color: #000000; line-height: 1.5; display: flex; flex-wrap: wrap; gap: 4px;">
+            {% comment %} Show affected teams {% endcomment %}
+            {% for field in incident.custom_field_entries %}
+              {% if field.custom_field.name == "Affected teams" and field.values.size > 0 %}
+                <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-weight: bold; border: 1px solid #000000;">
+                  👥 {% for value in field.values limit: 3 %}{{ value.value_catalog_entry.name }}{% unless forloop.last %}, {% endunless %}{% endfor %}
+                </span>
+              {% endif %}
+            {% endfor %}
+
+            {% comment %} Show affected services {% endcomment %}
+            {% for field in incident.custom_field_entries %}
+              {% if field.custom_field.name == "Affected services" and field.values.size > 0 %}
+                <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-weight: bold; border: 1px solid #000000;">
+                  ⚙️ {% for value in field.values limit: 3 %}{{ value.value_catalog_entry.name }}{% unless forloop.last %}, {% endunless %}{% endfor %}
+                </span>
+              {% endif %}
+            {% endfor %}
+
+            {% comment %} Show number of affected users {% endcomment %}
+            {% for field in incident.custom_field_entries %}
+              {% if field.custom_field.name == "Number of Affected Users" and field.values.size > 0 %}
+                <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-weight: bold; border: 1px solid #000000;">
+                  👤 {{ field.values[0].value_numeric }} users
+                </span>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="item">
+        <div class="content" style="text-align: center; padding: 20px;">
+          <div class="value--large" style="color: #000000; font-weight: bold;">✓</div>
+          <div class="label--medium" style="margin-top: 8px; color: #000000; font-size: 18px; font-weight: bold;">No Active Incidents</div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- Title Bar -->
+<div class="title_bar">
+  <img class="image" src="https://cdn.brandfetch.io/idBR-MZuZU/w/400/h/400/theme/dark/icon.jpeg">
+  <span class="title">Incident.io</span>
+  <span class="instance">
+    {% if active_count == 1 %}
+      1 Active Incident
+    {% elsif active_count > 1 %}
+      {{ active_count }} Active Incidents
+    {% else %}
+      All Clear
+    {% endif %}
+  </span>
+</div>

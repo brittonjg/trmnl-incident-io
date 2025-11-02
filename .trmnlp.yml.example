@@ -1,0 +1,38 @@
+# Local development configuration for Incident.io plugin
+# Copy this file to .trmnlp.yml and update with your actual values
+
+# Watch these files for changes during development
+watch:
+  - .trmnlp.yml
+  - src
+
+# Test values for custom fields (used when running bin/dev)
+custom_fields:
+  api_key: "inc_your_api_key_here"  # Get from Incident.io Settings > API Keys
+  max_incidents: 10
+
+# Static test data (optional - for testing without API)
+# Uncomment and customize the static_data section below if you want to test with mock data
+# static_data: |
+#   {
+#     "incidents": [
+#       {
+#         "id": "01HZXYZ123ABC",
+#         "name": "Example incident",
+#         "reference": "INC-123",
+#         "created_at": "2025-10-31T14:30:00Z",
+#         "incident_status": {
+#           "category": "live",
+#           "name": "Investigating"
+#         },
+#         "severity": {
+#           "name": "P1",
+#           "rank": 1
+#         },
+#         "incident_type": {
+#           "name": "Service Outage"
+#         },
+#         "custom_field_entries": []
+#       }
+#     ]
+#   }

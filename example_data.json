@@ -1,0 +1,157 @@
+{
+  "incidents": [
+    {
+      "id": "01HZXYZ123ABC",
+      "name": "Database performance degradation",
+      "summary": "Queries taking 5x longer than normal on production DB",
+      "created_at": "2025-10-31T14:30:00Z",
+      "updated_at": "2025-10-31T15:45:00Z",
+      "status": {
+        "category": "live",
+        "name": "Investigating"
+      },
+      "severity": {
+        "name": "Critical",
+        "rank": 1
+      },
+      "incident_role_assignments": [
+        {
+          "role": {
+            "name": "Incident Lead"
+          },
+          "assignee": {
+            "name": "Sarah Chen"
+          }
+        },
+        {
+          "role": {
+            "name": "Communications Lead"
+          },
+          "assignee": {
+            "name": "Mike Johnson"
+          }
+        }
+      ],
+      "incident_type": {
+        "name": "Service Degradation"
+      },
+      "has_debrief": true
+    },
+    {
+      "id": "01HZXYZ124DEF",
+      "name": "API rate limiting errors",
+      "summary": "Users experiencing 429 errors on /api/v2/users endpoint",
+      "created_at": "2025-11-01T09:15:00Z",
+      "updated_at": "2025-11-01T09:20:00Z",
+      "status": {
+        "category": "live",
+        "name": "Identified"
+      },
+      "severity": {
+        "name": "High",
+        "rank": 2
+      },
+      "incident_role_assignments": [
+        {
+          "role": {
+            "name": "Incident Lead"
+          },
+          "assignee": {
+            "name": "Alex Martinez"
+          }
+        }
+      ],
+      "incident_type": {
+        "name": "Service Outage"
+      }
+    },
+    {
+      "id": "01HZXYZ125GHI",
+      "name": "Monitoring alerts not delivering",
+      "summary": "PagerDuty integration failing to send notifications",
+      "created_at": "2025-11-01T08:00:00Z",
+      "updated_at": "2025-11-01T10:30:00Z",
+      "status": {
+        "category": "live",
+        "name": "Monitoring"
+      },
+      "severity": {
+        "name": "Medium",
+        "rank": 3
+      },
+      "incident_role_assignments": [
+        {
+          "role": {
+            "name": "Incident Lead"
+          },
+          "assignee": {
+            "name": "Jordan Lee"
+          }
+        }
+      ],
+      "incident_type": {
+        "name": "Infrastructure"
+      }
+    },
+    {
+      "id": "01HZXYZ126JKL",
+      "name": "Login page slow loading",
+      "summary": "Login page taking 10+ seconds to load for EMEA users",
+      "created_at": "2025-11-01T07:00:00Z",
+      "updated_at": "2025-11-01T11:00:00Z",
+      "status": {
+        "category": "closed",
+        "name": "Resolved"
+      },
+      "severity": {
+        "name": "Low",
+        "rank": 4
+      },
+      "incident_role_assignments": [
+        {
+          "role": {
+            "name": "Incident Lead"
+          },
+          "assignee": {
+            "name": "Taylor Swift"
+          }
+        }
+      ],
+      "incident_type": {
+        "name": "Performance"
+      }
+    },
+    {
+      "id": "01HZXYZ127MNO",
+      "name": "Email delivery delays",
+      "summary": "Transactional emails delayed by 15-20 minutes",
+      "created_at": "2025-10-31T22:00:00Z",
+      "updated_at": "2025-11-01T01:00:00Z",
+      "status": {
+        "category": "closed",
+        "name": "Resolved"
+      },
+      "severity": {
+        "name": "Medium",
+        "rank": 3
+      },
+      "incident_role_assignments": [
+        {
+          "role": {
+            "name": "Incident Lead"
+          },
+          "assignee": {
+            "name": "Chris Wang"
+          }
+        }
+      ],
+      "incident_type": {
+        "name": "Service Degradation"
+      }
+    }
+  ],
+  "pagination_meta": {
+    "after": null,
+    "page_size": 25
+  }
+}
