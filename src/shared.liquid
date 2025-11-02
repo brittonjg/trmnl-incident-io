@@ -273,18 +273,18 @@
   ============================================
   Display title bar with logo and status (always shows status)
 
-  Usage: {% render "title_bar" %}
+  Usage: {% render "title_bar", active: active_count %}
 {% endcomment %}
 
 {% template title_bar %}
   <div class="title_bar">
-    <img class="image" src="assets/incident-io.png">
+    <img class="image" src="https://incident.io/brand/resources/icon-dark.svg">
     <span class="title">Incident.io</span>
     <span class="instance">
-      {% if active_count == 1 %}
+      {% if active == 1 %}
         1 Active Incident
-      {% elsif active_count > 1 %}
-        {{ active_count }} Active Incidents
+      {% elsif active > 1 %}
+        {{ active }} Active Incidents
       {% else %}
         All Clear
       {% endif %}
