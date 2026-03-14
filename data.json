@@ -1,0 +1,208 @@
+{
+  "incidents": [
+    {
+      "id": "01HZXYZ123ABC",
+      "name": "Database performance degradation",
+      "reference": "INC-123",
+      "summary": "Queries taking 5x longer than normal on production DB",
+      "created_at": "2026-03-14T14:30:00Z",
+      "updated_at": "2026-03-14T15:45:00Z",
+      "incident_status": {
+        "category": "live",
+        "name": "Investigating"
+      },
+      "severity": {
+        "name": "P1",
+        "rank": 1
+      },
+      "incident_role_assignments": [
+        {
+          "role": { "name": "Incident Lead" },
+          "assignee": { "name": "Sarah Chen" }
+        }
+      ],
+      "incident_type": { "name": "Service Degradation" },
+      "has_debrief": true,
+      "custom_field_entries": [
+        {
+          "custom_field": { "name": "Affected teams" },
+          "values": [
+            { "value_catalog_entry": { "name": "Platform" } },
+            { "value_catalog_entry": { "name": "Core" } }
+          ]
+        },
+        {
+          "custom_field": { "name": "Affected services" },
+          "values": [
+            { "value_catalog_entry": { "name": "PostgreSQL Primary" } }
+          ]
+        },
+        {
+          "custom_field": { "name": "Number of Affected Users" },
+          "values": [
+            { "value_numeric": 2500 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "01HZXYZ124DEF",
+      "name": "API rate limiting errors on user endpoints",
+      "reference": "INC-124",
+      "summary": "Users experiencing 429 errors on /api/v2/users endpoint",
+      "created_at": "2026-03-14T09:15:00Z",
+      "updated_at": "2026-03-14T09:20:00Z",
+      "incident_status": {
+        "category": "live",
+        "name": "Identified"
+      },
+      "severity": {
+        "name": "P2",
+        "rank": 2
+      },
+      "incident_role_assignments": [
+        {
+          "role": { "name": "Incident Lead" },
+          "assignee": { "name": "Alex Martinez" }
+        }
+      ],
+      "incident_type": { "name": "Service Outage" },
+      "custom_field_entries": [
+        {
+          "custom_field": { "name": "Affected teams" },
+          "values": [
+            { "value_catalog_entry": { "name": "New Ventures" } }
+          ]
+        },
+        {
+          "custom_field": { "name": "Affected services" },
+          "values": [
+            { "value_catalog_entry": { "name": "API Gateway" } },
+            { "value_catalog_entry": { "name": "Rate Limiter" } }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "01HZXYZ125GHI",
+      "name": "Monitoring alerts not delivering to on-call",
+      "reference": "INC-125",
+      "summary": "PagerDuty integration failing to send notifications",
+      "created_at": "2026-03-13T08:00:00Z",
+      "updated_at": "2026-03-14T10:30:00Z",
+      "incident_status": {
+        "category": "learning",
+        "name": "Post-incident"
+      },
+      "severity": {
+        "name": "P3",
+        "rank": 3
+      },
+      "incident_role_assignments": [
+        {
+          "role": { "name": "Incident Lead" },
+          "assignee": { "name": "Jordan Lee" }
+        }
+      ],
+      "incident_type": { "name": "Infrastructure" },
+      "custom_field_entries": [
+        {
+          "custom_field": { "name": "Affected teams" },
+          "values": [
+            { "value_catalog_entry": { "name": "Platform" } }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "01HZXYZ126JKL",
+      "name": "Login page slow loading for EMEA users",
+      "reference": "INC-126",
+      "summary": "Login page taking 10+ seconds to load for EMEA users",
+      "created_at": "2026-03-12T07:00:00Z",
+      "updated_at": "2026-03-12T11:00:00Z",
+      "incident_status": {
+        "category": "closed",
+        "name": "Resolved"
+      },
+      "severity": {
+        "name": "P4",
+        "rank": 4
+      },
+      "incident_role_assignments": [
+        {
+          "role": { "name": "Incident Lead" },
+          "assignee": { "name": "Chris Park" }
+        }
+      ],
+      "incident_type": { "name": "Performance" },
+      "custom_field_entries": []
+    },
+    {
+      "id": "01HZXYZ127MNO",
+      "name": "Payment processing timeout during peak hours",
+      "reference": "INC-127",
+      "summary": "Stripe webhook processing delayed by 30+ seconds",
+      "created_at": "2026-03-11T16:45:00Z",
+      "updated_at": "2026-03-11T19:30:00Z",
+      "incident_status": {
+        "category": "closed",
+        "name": "Resolved"
+      },
+      "severity": {
+        "name": "P2",
+        "rank": 2
+      },
+      "incident_role_assignments": [
+        {
+          "role": { "name": "Incident Lead" },
+          "assignee": { "name": "Sarah Chen" }
+        }
+      ],
+      "incident_type": { "name": "Service Degradation" },
+      "custom_field_entries": [
+        {
+          "custom_field": { "name": "Affected services" },
+          "values": [
+            { "value_catalog_entry": { "name": "Payment Service" } },
+            { "value_catalog_entry": { "name": "Stripe Webhooks" } }
+          ]
+        },
+        {
+          "custom_field": { "name": "Number of Affected Users" },
+          "values": [
+            { "value_numeric": 800 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "01HZXYZ128PQR",
+      "name": "CDN cache invalidation not propagating",
+      "reference": "INC-128",
+      "summary": "Static assets serving stale content after deployment",
+      "created_at": "2026-03-10T12:00:00Z",
+      "updated_at": "2026-03-10T13:15:00Z",
+      "incident_status": {
+        "category": "closed",
+        "name": "Resolved"
+      },
+      "severity": {
+        "name": "P3",
+        "rank": 3
+      },
+      "incident_role_assignments": [
+        {
+          "role": { "name": "Incident Lead" },
+          "assignee": { "name": "Jordan Lee" }
+        }
+      ],
+      "incident_type": { "name": "Infrastructure" },
+      "custom_field_entries": []
+    }
+  ],
+  "pagination_meta": {
+    "after": null,
+    "page_size": 25
+  }
+}

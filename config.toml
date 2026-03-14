@@ -1,0 +1,4 @@
+strategy = "polling"
+
+# Local file path for build-time data (uses static_data from .trmnlp.yml)
+url = "data.json"
