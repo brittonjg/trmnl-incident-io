@@ -1,0 +1,20 @@
+{% comment %}
+  Shared reference for Incident.io TRMNL Plugin
+  NOTE: This file is NOT prepended by the gem. Each layout is self-contained.
+  This exists as documentation of the counting logic and data structure.
+
+  Counting logic (duplicated in each layout):
+    - active_count: incidents where category == "live"
+    - learning_count: incidents where category == "learning"
+    - critical_count: active incidents where severity.name == "P1"
+    - total_count: active_count + learning_count
+
+  Incident card fields:
+    - incident.reference (e.g. "INC-123")
+    - incident.name (clamped to 1 line)
+    - incident.incident_status.name (e.g. "Investigating")
+    - incident.severity.name (P1-P5, drives emphasis class)
+    - incident.created_at (formatted as "Mar 14 14:30")
+    - Incident Lead: extracted from incident_role_assignments via manual loop
+    - Affected teams: extracted from custom_field_entries via manual loop
+{% endcomment %}

@@ -1,0 +1,53 @@
+{% comment %}
+  Incident.io - Quadrant Layout
+  Metrics only: Active, Critical, Learning
+{% endcomment %}
+
+{% assign all_incidents = incidents %}
+{% assign active_count = 0 %}
+{% assign learning_count = 0 %}
+{% assign critical_count = 0 %}
+{% for incident in all_incidents %}
+  {% if incident.incident_status.category == "live" %}
+    {% assign active_count = active_count | plus: 1 %}
+    {% if incident.severity.name == "P1" %}
+      {% assign critical_count = critical_count | plus: 1 %}
+    {% endif %}
+  {% elsif incident.incident_status.category == "learning" %}
+    {% assign learning_count = learning_count | plus: 1 %}
+  {% endif %}
+{% endfor %}
+{% assign total_count = active_count | plus: learning_count %}
+
+<div class="layout layout--col gap--space-between">
+
+  <div class="grid grid--cols-3 gap--medium">
+    <div class="item">
+      <div class="content text--center">
+        <div class="value--large text--black">{{ active_count }}</div>
+        <div class="label text--black mt--1">Active</div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="content text--center">
+        <div class="value--large text--black">{{ critical_count }}</div>
+        <div class="label text--black mt--1">Critical</div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="content text--center">
+        <div class="value--large text--black">{{ learning_count }}</div>
+        <div class="label text--black mt--1">Learning</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="title_bar">
+  <img class="image" src="https://incident.io/brand/resources/icon-dark.svg">
+  <span class="title">Incident.io</span>
+  <span class="instance">
+    {% if total_count == 1 %}1 Active Incident{% elsif total_count > 1 %}{{ total_count }} Active Incidents{% else %}All Clear{% endif %}
+  </span>
+</div>

@@ -9,7 +9,7 @@ watch:
 # Test values for custom fields (used when running bin/dev)
 custom_fields:
   api_key: "inc_your_api_key_here"  # Get from Incident.io Settings > API Keys
-  max_incidents: 10
+  max_incidents: 100
 
 # Static test data (optional - for testing without API)
 # Uncomment and customize the static_data section below if you want to test with mock data

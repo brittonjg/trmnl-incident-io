@@ -3,6 +3,10 @@
 
 # Build output directory
 _build/
+tmp/
+
+# Local test data (may contain real API responses)
+data.json
 
 # OS files
 .DS_Store

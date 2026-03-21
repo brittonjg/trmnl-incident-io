@@ -1,0 +1,110 @@
+{% comment %}
+  Incident.io - Half Vertical Layout
+  Single-column list of active + learning incidents
+{% endcomment %}
+
+{% assign all_incidents = incidents %}
+{% assign active_count = 0 %}
+{% assign learning_count = 0 %}
+{% assign critical_count = 0 %}
+{% for incident in all_incidents %}
+  {% if incident.incident_status.category == "live" %}
+    {% assign active_count = active_count | plus: 1 %}
+    {% if incident.severity.name == "P1" %}
+      {% assign critical_count = critical_count | plus: 1 %}
+    {% endif %}
+  {% elsif incident.incident_status.category == "learning" %}
+    {% assign learning_count = learning_count | plus: 1 %}
+  {% endif %}
+{% endfor %}
+{% assign total_count = active_count | plus: learning_count %}
+
+<div class="layout layout--col gap--space-between">
+
+  <!-- Metrics Header -->
+  <div class="grid grid--cols-3 gap--medium">
+    <div class="item">
+      <div class="content">
+        <div class="value--large text--black">{{ active_count }}</div>
+        <div class="label text--black">Active</div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="content">
+        <div class="value--large text--black">{{ critical_count }}</div>
+        <div class="label text--black">Critical</div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="content">
+        <div class="value--large text--black">{{ learning_count }}</div>
+        <div class="label text--black">Learning</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Incidents List -->
+  <div class="grid grid--cols-1 gap--small mt--2.5">
+    {% assign shown = 0 %}
+    {% for incident in all_incidents %}
+      {% if shown < 3 %}
+        {% assign shown = shown | plus: 1 %}
+
+        {% assign incident_lead = "" %}
+        {% for ra in incident.incident_role_assignments %}
+          {% if ra.role.name == "Incident Lead" %}
+            {% assign incident_lead = ra.assignee.name %}
+            {% break %}
+          {% endif %}
+        {% endfor %}
+
+        {% if incident.severity.name == 'P1' %}
+          <div class="item item--emphasis-3 pl--1.5 pb--1.5">
+        {% elsif incident.severity.name == 'P2' %}
+          <div class="item item--emphasis-2 pl--1.5 pb--1.5">
+        {% else %}
+          <div class="item pl--1.5 pb--1.5">
+        {% endif %}
+          <div class="content">
+            <div class="label--small text--black mb--1">{{ incident.reference }}</div>
+            <div class="label text--black mb--1" data-clamp="1">{{ incident.name }}</div>
+            <div class="label--small text--black">
+              {{ incident.incident_status.name }} &bull;
+              <span class="label label--inverted rounded--xsmall ml--1">{% if incident.severity.name == 'P1' %}&#9632;{% elsif incident.severity.name == 'P2' %}&#9679;{% elsif incident.severity.name == 'P3' %}&#9650;{% else %}&#9675;{% endif %} {{ incident.severity.name }}</span>
+              &bull; {{ incident.created_at | date: "%b %d %H:%M" }}
+            </div>
+            {% if incident_lead != "" %}
+              <div class="label--small text--black mt--1">Lead: {{ incident_lead }}</div>
+            {% endif %}
+            {% for entry in incident.custom_field_entries %}
+              {% if entry.custom_field.name == "Affected teams" and entry.values.size > 0 %}
+                <div class="flex flex--wrap gap--[4px] mt--1">
+                  {% for val in entry.values %}
+                    <span class="label label--inverted rounded--[3px]">{{ val.value_catalog_entry.name }}</span>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+    {% if total_count == 0 %}
+      <div class="item">
+        <div class="content text--center p--5">
+          <div class="value--large text--black">&#10003;</div>
+          <div class="label mt--2 text--black">No Active Incidents</div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<div class="title_bar">
+  <img class="image" src="https://incident.io/brand/resources/icon-dark.svg">
+  <span class="title">Incident.io</span>
+  <span class="instance">
+    {% if total_count == 1 %}1 Active Incident{% elsif total_count > 1 %}{{ total_count }} Active Incidents{% else %}All Clear{% endif %}
+  </span>
+</div>
