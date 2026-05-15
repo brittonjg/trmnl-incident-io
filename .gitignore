@@ -22,3 +22,9 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Bundler local config (from `bundle config --local ...`)
+.bundle/
+
+# Claude Code worktrees and session state
+.claude/

@@ -153,15 +153,13 @@ The `api_key` custom field is interpolated into the Bearer token.
 
 ## Deployment
 
-To push to TRMNL server:
-```bash
-trmnlp push
-```
+The `trmnl_preview` gem (CLI: `trmnlp`) only ships three commands: `build`, `serve`, and `version`. There is **no `trmnlp push` or `trmnlp login`** — to publish a new version of the plugin to the TRMNL marketplace, upload the contents of `src/` (or a zip of the repo) via the TRMNL web UI under your private plugin's settings.
 
-Make sure you're logged in first:
-```bash
-trmnlp login
-```
+## Local Development Setup
+
+- **Ruby 3.4+** is required (`trmnl_preview` ≥ 0.4 depends on `xdg ~> 9.1` which needs Ruby ≥ 3.4). With Ruby 3.3 the dependency resolver silently falls back to `trmnl_preview` 0.3.2 — an older release that uses a different config format (`config.toml` + `views/` instead of `.trmnlp.yml` + `src/`) and will not work with this repo.
+- Recommended install path: `mise` (pinned via `mise.toml` at the repo root). On a fresh machine: `brew install mise && mise install && gem install trmnl_preview`.
+- Optional but useful: `brew install --cask firefox && brew install imagemagick` — needed if you want PNG screenshot output from `trmnlp build` rather than just live HTML.
 
 ## Active Incident Calculation
 
