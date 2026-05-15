@@ -43,8 +43,10 @@ The recipe polls the Incident.io API every 15 minutes by default. You can adjust
 ### Prerequisites
 
 You need either:
-- Ruby with `trmnl_preview` gem: `gem install trmnl_preview`
+- **Ruby 3.4+** with the `trmnl_preview` gem: `gem install trmnl_preview` (recommended: install Ruby via [mise](https://mise.jdx.dev/) — the repo includes a `mise.toml` pinning the right version, so `mise install` is the whole step)
 - OR Docker: [Install Docker](https://docs.docker.com/get-docker/)
+
+> Note: Ruby ≥ 3.4 is required because `trmnl_preview` ≥ 0.4 depends on `xdg ~> 9.1`. On older Ruby, the resolver silently installs gem 0.3.2 which uses an incompatible config format.
 
 ### Running Locally
 
